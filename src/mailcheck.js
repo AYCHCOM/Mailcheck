@@ -13,16 +13,19 @@
 
 var Kicksend = {
   mailcheck : {
-    threshold: 3,
+    threshold: 2,
 
-    defaultDomains: ["yahoo.com", "google.com", "hotmail.com", "gmail.com", "me.com", "aol.com", "mac.com",
-      "live.com", "comcast.net", "googlemail.com", "msn.com", "hotmail.co.uk", "yahoo.co.uk",
-      "facebook.com", "verizon.net", "sbcglobal.net", "att.net", "gmx.com", "mail.com", "outlook.com", "icloud.com"],
+    defaultDomains: ["google.com", "gmail.com", "me.com", "aol.com", "mac.com", "comcast.net",
+                     "googlemail.com", "msn.com", "facebook.com", "verizon.net", "sbcglobal.net",
+                     "att.net", "icloud.com"],
+
+    defaultSecondLevelDomains: ["yahoo", "hotmail", "mail", "live", "outlook", "gmx"],
 
     defaultTopLevelDomains: ["co.jp", "co.uk", "com", "net", "org", "info", "edu", "gov", "mil", "ca"],
 
     run: function(opts) {
       opts.domains = opts.domains || Kicksend.mailcheck.defaultDomains;
+      opts.secondLevelDomains = opts.secondLevelDomains || Kicksend.mailcheck.defaultSecondLevelDomains;
       opts.topLevelDomains = opts.topLevelDomains || Kicksend.mailcheck.defaultTopLevelDomains;
       opts.distanceFunction = opts.distanceFunction || Kicksend.sift3Distance;
 
@@ -30,12 +33,12 @@ var Kicksend = {
       var suggestedCallback = opts.suggested || defaultCallback
       var emptyCallback = opts.empty || defaultCallback
 
-      var result = Kicksend.mailcheck.suggest(encodeURI(opts.email), opts.domains, opts.topLevelDomains, opts.distanceFunction);
+      var result = Kicksend.mailcheck.suggest(encodeURI(opts.email), opts.domains, opts.secondLevelDomains, opts.topLevelDomains, opts.distanceFunction);
 
       return result ? suggestedCallback(result) : emptyCallback()
     },
 
-    suggest: function(email, domains, topLevelDomains, distanceFunction) {
+    suggest: function(email, domains, secondLevelDomains, topLevelDomains, distanceFunction) {
       email = email.toLowerCase();
 
       var emailParts = this.splitEmail(email);
@@ -43,20 +46,39 @@ var Kicksend = {
       var closestDomain = this.findClosestDomain(emailParts.domain, domains, distanceFunction);
 
       if (closestDomain) {
-        if (closestDomain != emailParts.domain) {
+        if (closestDomain == emailParts.domain) {
+          return false;
+        } else {
           // The email address closely matches one of the supplied domains; return a suggestion
           return { address: emailParts.address, domain: closestDomain, full: emailParts.address + "@" + closestDomain };
         }
-      } else {
-        // The email address does not closely match one of the supplied domains
-        var closestTopLevelDomain = this.findClosestDomain(emailParts.topLevelDomain, topLevelDomains);
-        if (emailParts.domain && closestTopLevelDomain && closestTopLevelDomain != emailParts.topLevelDomain) {
+      }
+
+      // The email address does not closely match one of the supplied domains
+      var closestSecondLevelDomain = this.findClosestDomain(emailParts.secondLevelDomain, secondLevelDomains, distanceFunction, 1.5);
+      var closestTopLevelDomain = this.findClosestDomain(emailParts.topLevelDomain, topLevelDomains, distanceFunction, 1.5);
+
+      if (emailParts.domain) {
+        var closestDomain = emailParts.domain;
+        var rtrn = false;
+
+        if(closestSecondLevelDomain && closestSecondLevelDomain != emailParts.secondLevelDomain) {
+          // The email address may have a mispelled 2nd-level domain; return a suggestion
+          closestDomain = closestDomain.replace(emailParts.secondLevelDomain, closestSecondLevelDomain);
+          rtrn = true;
+        }
+
+        if(closestTopLevelDomain && closestTopLevelDomain != emailParts.topLevelDomain) {
           // The email address may have a mispelled top-level domain; return a suggestion
-          var domain = emailParts.domain;
-          closestDomain = domain.substring(0, domain.lastIndexOf(emailParts.topLevelDomain)) + closestTopLevelDomain;
+          closestDomain = closestDomain.replace(emailParts.topLevelDomain, closestTopLevelDomain);
+          rtrn = true;
+        }
+
+        if (rtrn == true) {
           return { address: emailParts.address, domain: closestDomain, full: emailParts.address + "@" + closestDomain };
         }
       }
+
       /* The email address exactly matches one of the supplied domains, does not closely
        * match any domain and does not appear to simply have a mispelled top-level domain,
        * or is an invalid email address; do not return a suggestion.
