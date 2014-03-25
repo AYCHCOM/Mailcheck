@@ -13,7 +13,9 @@
 
 var Kicksend = {
   mailcheck : {
-    threshold: 2,
+    domain_threshold: 2,
+    sld_threshold: 1.5,
+    tld_threshold: 1.5,
 
     defaultDomains: ["google.com", "gmail.com", "me.com", "aol.com", "mac.com", "comcast.net",
                      "googlemail.com", "msn.com", "facebook.com", "verizon.net", "sbcglobal.net",
@@ -43,7 +45,7 @@ var Kicksend = {
 
       var emailParts = this.splitEmail(email);
 
-      var closestDomain = this.findClosestDomain(emailParts.domain, domains, distanceFunction);
+      var closestDomain = this.findClosestDomain(emailParts.domain, domains, distanceFunction, this.domain_threshold);
 
       if (closestDomain) {
         if (closestDomain == emailParts.domain) {
@@ -55,8 +57,8 @@ var Kicksend = {
       }
 
       // The email address does not closely match one of the supplied domains
-      var closestSecondLevelDomain = this.findClosestDomain(emailParts.secondLevelDomain, secondLevelDomains, distanceFunction, 1.5);
-      var closestTopLevelDomain = this.findClosestDomain(emailParts.topLevelDomain, topLevelDomains, distanceFunction, 1.5);
+      var closestSecondLevelDomain = this.findClosestDomain(emailParts.secondLevelDomain, secondLevelDomains, distanceFunction, this.sld_threshold);
+      var closestTopLevelDomain = this.findClosestDomain(emailParts.topLevelDomain, topLevelDomains, distanceFunction, this.tld_threshold);
 
       if (emailParts.domain) {
         var closestDomain = emailParts.domain;
@@ -86,10 +88,11 @@ var Kicksend = {
       return false;
     },
 
-    findClosestDomain: function(domain, domains, distanceFunction) {
+    findClosestDomain: function(domain, domains, distanceFunction, threshold) {
       var dist;
       var minDist = 99;
       var closestDomain = null;
+      threshold = typeof threshold !== 'undefined' ? threshold : 2;
 
       if (!domain || !domains) {
         return false;
@@ -109,7 +112,7 @@ var Kicksend = {
         }
       }
 
-      if (minDist <= this.threshold && closestDomain !== null) {
+      if (minDist <= threshold && closestDomain !== null) {
         return closestDomain;
       } else {
         return false;
