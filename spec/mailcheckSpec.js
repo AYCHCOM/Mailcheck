@@ -136,13 +136,15 @@ describe("mailcheck", function() {
         expect(mailcheck.splitEmail('test@example.com')).toEqual({
           address:'test',
           domain:'example.com',
-          topLevelDomain:'com'
+          topLevelDomain:'com',
+          secondLevelDomain:'example'
         });
 
         expect(mailcheck.splitEmail('test@example.co.uk')).toEqual({
           address:'test',
           domain:'example.co.uk',
-          topLevelDomain:'co.uk'
+          topLevelDomain:'co.uk',
+          secondLevelDomain:'example'
         });
 
         /* This test is for illustrative purposes as the splitEmail function should return a better
@@ -151,7 +153,8 @@ describe("mailcheck", function() {
         expect(mailcheck.splitEmail('test@mail.randomsmallcompany.co.uk')).toEqual({
           address:'test',
           domain:'mail.randomsmallcompany.co.uk',
-          topLevelDomain:'randomsmallcompany.co.uk'
+          topLevelDomain:'randomsmallcompany.co.uk',
+          secondLevelDomain:'mail'
         });
       });
 
@@ -159,48 +162,56 @@ describe("mailcheck", function() {
         expect(mailcheck.splitEmail('"foo@bar"@example.com')).toEqual({
           address:'"foo@bar"',
           domain:'example.com',
-          topLevelDomain:'com'
-
+          topLevelDomain:'com',
+          secondLevelDomain:'example'
         });
         expect(mailcheck.splitEmail('containsnumbers1234567890@example.com')).toEqual({
           address:'containsnumbers1234567890',
           domain:'example.com',
-          topLevelDomain:'com'
+          topLevelDomain:'com',
+          secondLevelDomain:'example'
         });
         expect(mailcheck.splitEmail('contains+symbol@example.com')).toEqual({
           address:'contains+symbol',
           domain:'example.com',
-          topLevelDomain:'com'
+          topLevelDomain:'com',
+          secondLevelDomain:'example'
         });
         expect(mailcheck.splitEmail('contains-symbol@example.com')).toEqual({
           address:'contains-symbol',
           domain:'example.com',
-          topLevelDomain:'com'
+          topLevelDomain:'com',
+          secondLevelDomain:'example'
         });
         expect(mailcheck.splitEmail('contains.symbol@domain.contains.symbol')).toEqual({
           address:'contains.symbol',
           domain:'domain.contains.symbol',
-          topLevelDomain:'contains.symbol'
+          topLevelDomain:'contains.symbol',
+          secondLevelDomain:'domain'
         });
         expect(mailcheck.splitEmail('"contains.and\ symbols"@example.com')).toEqual({
           address:'"contains.and\ symbols"',
           domain:'example.com',
-          topLevelDomain:'com'
+          topLevelDomain:'com',
+          secondLevelDomain:'example'
         });
         expect(mailcheck.splitEmail('"contains.and.@.symbols.com"@example.com')).toEqual({
           address:'"contains.and.@.symbols.com"',
           domain:'example.com',
-          topLevelDomain:'com'
+          topLevelDomain:'com',
+          secondLevelDomain:'example'
         });
         expect(mailcheck.splitEmail('"()<>[]:;@,\\\"!#$%&\'*+-/=?^_`{}|\ \ \ \ \ ~\ \ \ \ \ \ \ ?\ \ \ \ \ \ \ \ \ \ \ \ ^_`{}|~.a"@allthesymbols.com')).toEqual({
           address:'"()<>[]:;@,\\\"!#$%&\'*+-/=?^_`{}|\ \ \ \ \ ~\ \ \ \ \ \ \ ?\ \ \ \ \ \ \ \ \ \ \ \ ^_`{}|~.a"',
           domain:'allthesymbols.com',
-          topLevelDomain:'com'
+          topLevelDomain:'com',
+          secondLevelDomain:'allthesymbols'
         });
         expect(mailcheck.splitEmail('postbox@com')).toEqual({
           address:'postbox',
           domain:'com',
-          topLevelDomain:'com'
+          topLevelDomain:'com',
+          secondLevelDomain:''
         });
       });
 

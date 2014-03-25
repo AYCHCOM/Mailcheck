@@ -151,6 +151,7 @@ var Kicksend = {
 
       var domain = parts.pop();
       var domainParts = domain.split('.');
+      var sld = '';
       var tld = '';
 
       if (domainParts.length == 0) {
@@ -161,6 +162,7 @@ var Kicksend = {
         tld = domainParts[0];
       } else {
         // The address has a domain and a top-level domain
+        sld = domainParts[0];
         for (var i = 1; i < domainParts.length; i++) {
           tld += domainParts[i] + '.';
         }
@@ -170,8 +172,9 @@ var Kicksend = {
       }
 
       return {
-        topLevelDomain: tld,
         domain: domain,
+        secondLevelDomain: sld,
+        topLevelDomain: tld,
         address: parts.join('@')
       }
     }
