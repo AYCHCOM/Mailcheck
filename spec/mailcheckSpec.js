@@ -125,6 +125,7 @@ describe("mailcheck", function() {
         expect(mailcheck.suggest('test@', domains)).toBeFalsy();
         expect(mailcheck.suggest('test', domains)).toBeFalsy();
         expect(mailcheck.suggest('test@yahoo.co.uk', domains, secondLevelDomains, topLevelDomains)).toBeFalsy();
+        expect(mailcheck.suggest('test@test.gov.biz.co.uk', domains, secondLevelDomains, topLevelDomains)).toBeFalsy();
 
         /* This test is for illustrative purposes as the splitEmail function should return a better
          * representation of the true top-level domain in the case of an email address with subdomains.

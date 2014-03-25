@@ -45,6 +45,11 @@ var Kicksend = {
 
       var emailParts = this.splitEmail(email);
 
+      // return if the domain has more than 3 .'s
+      if (emailParts.domain && emailParts.domain.split(".").length >= 4) {
+        return false;
+      }
+
       var closestDomain = this.findClosestDomain(emailParts.domain, domains, distanceFunction, this.domain_threshold);
 
       if (closestDomain) {
@@ -97,6 +102,7 @@ var Kicksend = {
       if (!domain || !domains) {
         return false;
       }
+
       if(!distanceFunction) {
         distanceFunction = this.sift3Distance;
       }
